@@ -60,6 +60,7 @@ export class Position {
     private executeMoveCommand(moveCommandLists: EMoveType[][], positions: Position[]): number[] {
         const movablePositions = moveCommandLists.reduce<number[]>((p, moveCommandList)=>{
             let isValid = true;
+            let isTakeOverByItself = false;
             const position = this.copyPosition();
             moveCommandList.forEach((moveCommand, index, arr)=>{
                 if(!isValid) return;
@@ -92,10 +93,26 @@ export class Position {
                         while(tempPosition.checkIsCollision(positions) === ECollisionType.none && tempPosition.move(lastMoveCommand)) {
                             p.push(tempPosition.no)
                         }
-                        isValid = false; //take over the p's push
+                        isTakeOverByItself = true; 
                         break;
                     }
                     case EMoveType.jump: {
+                        const lastMoveCommand = arr[index - 2];
+                        const tempPosition = position.copyPosition();
+                        tempPosition.no = p[p.length - 1];
+
+                        if(tempPosition.checkIsCollision(positions) !== ECollisionType.none) {
+                            p.pop();
+                            while(tempPosition.copyPosition().move(lastMoveCommand)) {
+                                tempPosition.move(lastMoveCommand);
+                                if(tempPosition.checkIsCollision(positions) !== ECollisionType.none) {
+                                    p.push(tempPosition.no);
+                                }
+                            }
+                        }
+
+
+                        isTakeOverByItself = true;
                         break;
                     }
                     default: {
@@ -104,10 +121,9 @@ export class Position {
                     
                 }
             })
-            if (isValid) p.push(position.no)
+            if (isValid && !isTakeOverByItself) p.push(position.no)
             return p;
         }, [])
-        console.log(movablePositions)
         return movablePositions;
     }
 
@@ -115,7 +131,7 @@ export class Position {
         let moveCommandLists: EMoveType[][] = [];
         switch(this.role) {
             case ERole.g: {
-                moveCommandLists = [[EMoveType.left],[EMoveType.up],[EMoveType.down],[EMoveType.right]]
+                moveCommandLists = [[EMoveType.left], [EMoveType.up], [EMoveType.down], [EMoveType.right]]
                 break;
             }
             case ERole.s: {
@@ -145,7 +161,7 @@ export class Position {
                 break;
             }
             case ERole.c: {
-                moveCommandLists = [/* [EMoveType.left, EMoveType.until],[EMoveType.right, EMoveType.until], */[EMoveType.up, EMoveType.until]/* ,[EMoveType.down, EMoveType.until] */]
+                moveCommandLists = [[EMoveType.left, EMoveType.until],[EMoveType.right, EMoveType.until], [EMoveType.up, EMoveType.until], [EMoveType.down, EMoveType.until]]
                 break;
             }
             case ERole.p: {

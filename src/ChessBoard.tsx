@@ -45,9 +45,7 @@ function ChessBoard() {
             return <div 
               key={no}
               onClick={()=>{
-                  console.log(no)
-                  board.current.handleSelect(no)
-                  board.current.render()
+                  board.current.handleInvokeClick(no)
                 }}
               style={{ position: "absolute", left, top }}
               >

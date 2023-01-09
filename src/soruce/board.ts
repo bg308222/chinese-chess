@@ -4,6 +4,8 @@ import { EColor, ERole, EStatus } from "./type";
 
 export class Board {
     
+    private turn: EColor = EColor.r
+
     public originPositions: Position[] = [
         //black
         new Position(0,  ERole.c,  EColor.b),
@@ -108,6 +110,8 @@ export class Board {
         new Position(89,  ERole.c,  EColor.r),
     ]
 
+    private selectedPosition?: Position;
+
     private positions: Position[]
     private setter?: React.Dispatch<React.SetStateAction<Position[]>>
 
@@ -125,18 +129,74 @@ export class Board {
         })
     }
 
-    public handleSelect(target: number) {
+    public clearCertainPosition(position?: Position) {
+        if (position) {
+            position.color = EColor.none;
+            position.role = ERole.none;
+            position.status = EStatus.none
+        }
+    }
+
+    private copyPosition(target: Position, source?: Position) {
+        if (source) {
+            target.color = source.color
+            target.role = source.role
+            target.status = source.status
+        }
+    }
+
+    public handleInvokeClick(target: number) {
+        const position = this.positions[target]
+        if (position.status === EStatus.none) this.handleSelect(position);
+        else this.handleMove(position);
+    }
+
+    public handleSelect(position: Position) {
+        if (this.turn !== position.color) return;
+
+        console.log("select")
         this.clearStatus()
 
-        const position = this.positions[target]
         if (position.role === ERole.none) {
+            this.render();
+            this.selectedPosition = undefined;
             return;
         };
 
-        /* const movablePosition = */  position.getMovablePosition(this.positions)
+        const movablePositions =  position.getMovablePosition(this.positions)
         
         position.status = EStatus.selected;
+        movablePositions.forEach(movablePosition => {
+            const movablePositionObj = this.positions[movablePosition];
+
+            if (movablePositionObj.role !== ERole.none) {
+                if (movablePositionObj.color !== position.color ) movablePositionObj.status = EStatus.eatable
+                else movablePositionObj.status = EStatus.none
+            }
+            else movablePositionObj.status = EStatus.movable;
+
+        })
+
+        this.render();
+        this.selectedPosition = position
     }
+
+    public handleMove(position: Position) {
+        console.log("move")
+        if (position.role === ERole.none) {
+            this.copyPosition(position, this.selectedPosition)
+            this.clearCertainPosition(this.selectedPosition);
+        } else {
+            if (position.status === EStatus.eatable) {
+                this.copyPosition(position, this.selectedPosition)
+                this.clearCertainPosition(this.selectedPosition);
+            }
+        }
+        this.render();
+        this.clearStatus()
+        this.turn = this.turn === EColor.b ? EColor.r : EColor.b
+    }
+
 
     public render() {
         if(this.setter) this.setter([...this.positions])
