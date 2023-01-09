@@ -57,6 +57,27 @@ export class Position {
         return ECollisionType.none
     }
 
+    private limitPositions(movablePositions: number[]): number[] {
+        switch (this.role) {
+            case ERole.g:
+            case ERole.s: {
+                const permitPositions = this.color === EColor.b ? [3, 4, 5, 12, 13, 14, 21, 22, 23] : [66, 67, 68, 75, 76, 77, 84, 85, 86];
+                return movablePositions.filter(v => permitPositions.includes(v));
+            }
+            case ERole.e: {
+                return movablePositions.filter(v => this.color === EColor.b ? v < 45 : v >= 45);
+            }
+            case ERole.z: {
+                // done before
+                break;
+            }
+            default: {
+                return movablePositions;
+            }
+        }
+        return movablePositions;
+    }
+
     private executeMoveCommand(moveCommandLists: EMoveType[][], positions: Position[]): number[] {
         const movablePositions = moveCommandLists.reduce<number[]>((p, moveCommandList)=>{
             let isValid = true;
@@ -124,8 +145,9 @@ export class Position {
             if (isValid && !isTakeOverByItself) p.push(position.no)
             return p;
         }, [])
-        return movablePositions;
+        return this.limitPositions(movablePositions);
     }
+
 
     public getMovablePosition(positions: Position[]): number[] {
         let moveCommandLists: EMoveType[][] = [];
@@ -169,7 +191,19 @@ export class Position {
                 break;
             }
             case ERole.z: {
-                moveCommandLists = [[EMoveType.left],[EMoveType.up],[EMoveType.down],[EMoveType.right]]
+                moveCommandLists = [[EMoveType.left],[EMoveType.up],[EMoveType.down],[EMoveType.right]].filter(([v]) => {
+                    if(this.color === EColor.b) {
+                        if (this.no < 45 && v === EMoveType.down)  return true;
+                        if (this.no >= 45 && v !== EMoveType.up) return true;
+                        return false;
+                    }
+                    if (this.color === EColor.r) {
+                        if (this.no > 44 && v === EMoveType.up) return true;
+                        if (this.no <= 44 && v !== EMoveType.down) return true;
+                        return false;
+                    }
+                    return true;
+                })
                 break;
             }
             default: {
@@ -180,5 +214,5 @@ export class Position {
 
 
         return this.executeMoveCommand(moveCommandLists, positions);
-    }
+    } 
 }
