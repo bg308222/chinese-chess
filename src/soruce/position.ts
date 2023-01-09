@@ -128,6 +128,7 @@ export class Position {
                                 tempPosition.move(lastMoveCommand);
                                 if(tempPosition.checkIsCollision(positions) !== ECollisionType.none) {
                                     p.push(tempPosition.no);
+                                    break;
                                 }
                             }
                         }

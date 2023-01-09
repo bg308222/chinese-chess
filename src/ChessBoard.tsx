@@ -9,7 +9,7 @@ import { EStatus } from './soruce/type';
 
 function ChessBoard() {
   const board = useRef(new Board());
-  const [positions, setPositions] = useState<Position[]>(board.current.originPositions)
+  const [positions, setPositions] = useState<Position[]>(board.current.resetPositions())
 
   useEffect(()=>{
     board.current.setSetter(setPositions)
@@ -54,6 +54,12 @@ function ChessBoard() {
           })}
         </div>
         <icons.BoardSvg />
+        <button style={{ position: "absolute", top: 0, left: 900 }} onClick={()=>{
+          board.current.regret()
+        }}>Regret</button>
+        <button style={{ position: "absolute", top: 0,left: 1000}} onClick={()=>{
+          board.current.restart();
+        }}>Restart</button>
       </div>
     </div>
   );
