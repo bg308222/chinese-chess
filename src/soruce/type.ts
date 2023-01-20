@@ -16,42 +16,48 @@
 */
 
 export enum ERole {
-    g = "g",
-    s = "s",
-    e = "e",
-    c = "c",
-    m = "m",
-    p = "p",
-    z = "z",
-    none =  "n",
+  g = "g",
+  s = "s",
+  e = "e",
+  c = "c",
+  m = "m",
+  p = "p",
+  z = "z",
+  none = "n",
 }
 
 export enum EColor {
-    r = "r",
-    b = "b",
-    none = "n"
+  r = "r",
+  b = "b",
+  none = "n",
 }
 
 export enum EStatus {
-     selected = 0,
-     movable = 1,
-     hover = 2,
-     eatable = 3,
-     none = 4
+  selected = 0,
+  movable = 1,
+  hover = 2,
+  eatable = 3,
+  none = 4,
 }
 
 export enum EMoveType {
-    up = 0,
-    left = 1,
-    down = 2,
-    right = 3,
-    block = 4,
-    until = 5,
-    jump = 6,
+  up = 0,
+  left = 1,
+  down = 2,
+  right = 3,
+  block = 4,
+  until = 5,
+  jump = 6,
 }
 
 export enum ECollisionType {
-    union = 0,
-    enemy = 1,
-    none = 2,
+  union = 0,
+  enemy = 1,
+  none = 2,
+}
+
+export enum EWsAction {
+  handleInvokeClick = 0,
+  regret = 1,
+  restart = 2,
 }
