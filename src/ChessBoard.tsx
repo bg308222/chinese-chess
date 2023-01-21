@@ -4,12 +4,24 @@ import { Board } from "./soruce/board";
 import { Position } from "./soruce/position";
 import { icons } from "./icons/preprocess";
 import { EColor, EStatus, EWsAction } from "./soruce/type";
-
+import eatAudio from "./audio/eat.mp3";
+import moveAudio from "./audio/move.mp3";
+import restartAudio from "./audio/restart.mp3";
+import selectAudio from "./audio/select.mp3";
+const playAudio = (audio: HTMLAudioElement) => {
+  audio.currentTime = 0;
+  audio.play();
+};
 function ChessBoard() {
   const board = useRef(new Board());
   const ws = useRef<WebSocket>();
   const isFirstRender = useRef(true);
-  const urlColor = useRef<EColor>(EColor.r);
+  const isFirstAudio = useRef(true);
+  const selectRef = useRef(new Audio());
+  const moveRef = useRef(new Audio());
+  const eatRef = useRef(new Audio());
+  const restartRef = useRef(new Audio());
+  const [giftedColor, setGiftedColor] = useState(EColor.r);
   const [positions, setPositions] = useState<Position[]>(
     board.current.resetPositions()
   );
@@ -18,32 +30,37 @@ function ChessBoard() {
     if (isFirstRender.current) {
       isFirstRender.current = false;
 
-      const colorStr = document.URL.match(/:\d+\/(.*)/)?.at(1);
-      if (colorStr && colorStr[1] === "b") urlColor.current = EColor.b;
-
-      if (!ws.current) ws.current = new WebSocket("ws://localhost:3001");
+      if (!ws.current) ws.current = new WebSocket("ws://59.115.105.204:3001");
       ws.current.addEventListener("open", () => {
-        const groupStr = document.URL.match(/:\d+\/(.*)/);
-
         if (ws.current) {
           ws.current.send(
             JSON.stringify({
               action: EWsAction.restart,
             })
           );
-          ws.current.send(
-            !groupStr || !groupStr[1] || groupStr[1] === "r"
-              ? EColor.r
-              : EColor.b
-          );
         }
       });
 
-      ws.current.addEventListener("message", async ({ data }) => {
+      ws.current.addEventListener("message", ({ data }) => {
         const { action, payload } = JSON.parse(data);
         switch (action) {
+          case EWsAction.giftedColor: {
+            setGiftedColor(payload === "r" ? EColor.r : EColor.b);
+            break;
+          }
           case EWsAction.handleInvokeClick: {
-            board.current.handleInvokeClick(payload);
+            board.current.handleInvokeClick(
+              payload,
+              () => {
+                playAudio(selectRef.current);
+              },
+              () => {
+                playAudio(moveRef.current);
+              },
+              () => {
+                playAudio(eatRef.current);
+              }
+            );
             break;
           }
           case EWsAction.regret: {
@@ -51,6 +68,11 @@ function ChessBoard() {
             break;
           }
           default: {
+            if (isFirstAudio.current) {
+              isFirstAudio.current = false;
+            } else {
+              playAudio(restartRef.current);
+            }
             board.current.restart();
             break;
           }
@@ -63,6 +85,10 @@ function ChessBoard() {
 
   return (
     <div>
+      <audio ref={selectRef} src={selectAudio}></audio>
+      <audio ref={moveRef} src={moveAudio}></audio>
+      <audio ref={eatRef} src={eatAudio}></audio>
+      <audio ref={restartRef} src={restartAudio}></audio>
       <div id="BoardContainer">
         <div id="ChessContainer">
           {positions.map(({ no, role, color, status }) => {
@@ -93,13 +119,14 @@ function ChessBoard() {
               <div
                 key={no}
                 onClick={() => {
-                  if (ws.current && board.current.checkColor(urlColor.current))
+                  if (ws.current && board.current.checkColor(giftedColor)) {
                     ws.current.send(
                       JSON.stringify({
                         action: EWsAction.handleInvokeClick,
                         payload: no,
                       })
                     );
+                  }
                   // board.current.handleInvokeClick(no);
                 }}
                 style={{ position: "absolute", left, top }}
@@ -129,6 +156,10 @@ function ChessBoard() {
         >
           Regret
         </button>
+        <span style={{ position: "absolute", top: 0, left: 850 }}>
+          {giftedColor}
+        </span>
+
         <button
           style={{ position: "absolute", top: 0, left: 1000 }}
           onClick={() => {

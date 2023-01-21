@@ -60,4 +60,5 @@ export enum EWsAction {
   handleInvokeClick = 0,
   regret = 1,
   restart = 2,
+  giftedColor = 3,
 }

@@ -13,18 +13,28 @@ const server = express().listen(PORT, () =>
 //將 express 交給 SocketServer 開啟 WebSocket 的服務
 const wss = new SocketServer({ server });
 
-//當 WebSocket 從外部連結時執行
 wss.on("connection", (ws) => {
-  //連結時執行此 console 提示
   console.log("Client connected");
 
+  setTimeout(() => {
+    if (wss.clients.size === 2) {
+      let index = 0;
+      wss.clients.forEach((client) => {
+        client.send(
+          JSON.stringify({
+            action: 3,
+            payload: index++ === 0 ? "r" : "b",
+          })
+        );
+      });
+    }
+  }, 100);
+
+  //連結時執行此 console 提示
   ws.on("message", (msg) => {
     const res = msg.toString();
-    // ws.group = msg.toString();
     wss.clients.forEach((client) => {
-      // if (client.group === ws.group) {
-      if (res !== "r" && res !== "b") client.send(res);
-      // }
+      client.send(res);
     });
   });
 

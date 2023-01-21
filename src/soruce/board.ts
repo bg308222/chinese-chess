@@ -163,23 +163,30 @@ export class Board {
     }
   }
 
-  public handleInvokeClick(target: number) {
+  public handleInvokeClick(
+    target: number,
+    selectCbf: () => void,
+    moveCbf: () => void,
+    eatCbf: () => void
+  ) {
     const position = this.positions[target];
-    if (position.status === EStatus.none) this.handleSelect(position);
-    else this.handleMove(position);
+    if (position.status === EStatus.none)
+      this.handleSelect(position, selectCbf);
+    else this.handleMove(position, moveCbf, eatCbf);
   }
 
-  public handleSelect(position: Position) {
+  public handleSelect(position: Position, selectCbf: () => void) {
+    console.log(this.turn, position);
     if (this.turn !== position.color) return;
 
     this.clearStatus();
-
     if (position.role === ERole.none) {
       this.render();
       this.selectedPosition = undefined;
       return;
     }
 
+    selectCbf();
     const movablePositions = position.getMovablePosition(this.positions);
 
     position.status = EStatus.selected;
@@ -197,17 +204,24 @@ export class Board {
     this.selectedPosition = position;
   }
 
-  public handleMove(position: Position) {
+  public handleMove(
+    position: Position,
+    moveCbf: () => void,
+    eatCbf: () => void
+  ) {
     if (position.no === this.selectedPosition?.no) return;
     if (position.role === ERole.none) {
       this.copyPosition(position, this.selectedPosition);
       this.clearCertainPosition(this.selectedPosition);
+      moveCbf();
     } else {
       if (position.status === EStatus.eatable) {
         this.copyPosition(position, this.selectedPosition);
         this.clearCertainPosition(this.selectedPosition);
+        eatCbf();
       }
     }
+    moveCbf();
     this.render();
     this.clearStatus();
     this.record.push(this.copyPositions(this.positions));
