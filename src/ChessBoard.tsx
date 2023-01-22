@@ -143,7 +143,7 @@ function ChessBoard() {
         </div>
         <icons.BoardSvg />
         <button
-          style={{ position: "absolute", top: 0, left: 900 }}
+          style={{ position: "absolute", bottom: 130, left: 150 }}
           onClick={() => {
             if (ws.current)
               ws.current.send(
@@ -154,14 +154,11 @@ function ChessBoard() {
             // board.current.regret();
           }}
         >
-          Regret
+          悔棋
         </button>
-        <span style={{ position: "absolute", top: 0, left: 850 }}>
-          {giftedColor}
-        </span>
 
         <button
-          style={{ position: "absolute", top: 0, left: 1000 }}
+          style={{ position: "absolute", bottom: 130, left: 75 }}
           onClick={() => {
             if (ws.current)
               ws.current.send(
@@ -172,8 +169,48 @@ function ChessBoard() {
             // board.current.restart();
           }}
         >
-          Restart
+          新局
         </button>
+
+        {board.current.getCurrentColor() === EColor.r ? (
+          <icons.rempty
+            style={{
+              position: "absolute",
+              bottom: 169,
+              left: 900,
+              transform: "scale(0.70)",
+            }}
+          />
+        ) : (
+          <icons.bempty
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 900,
+              transform: "scale(0.70)",
+            }}
+          />
+        )}
+
+        {giftedColor === EColor.r ? (
+          <icons.rempty
+            style={{
+              position: "absolute",
+              bottom: 169,
+              left: 820,
+              transform: "scale(0.70)",
+            }}
+          />
+        ) : (
+          <icons.bempty
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 820,
+              transform: "scale(0.70)",
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -175,6 +175,10 @@ export class Board {
     else this.handleMove(position, moveCbf, eatCbf);
   }
 
+  public getCurrentColor() {
+    return this.turn;
+  }
+
   public handleSelect(position: Position, selectCbf: () => void) {
     console.log(this.turn, position);
     if (this.turn !== position.color) return;
