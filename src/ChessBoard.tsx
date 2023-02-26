@@ -25,12 +25,13 @@ function ChessBoard() {
   const [positions, setPositions] = useState<Position[]>(
     board.current.resetPositions()
   );
+  const offset = 450;
 
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
 
-      if (!ws.current) ws.current = new WebSocket("ws://59.115.105.204:3001");
+      if (!ws.current) ws.current = new WebSocket("ws://1.169.185.1:3001");
       ws.current.addEventListener("open", () => {
         if (ws.current) {
           ws.current.send(
@@ -67,6 +68,16 @@ function ChessBoard() {
             board.current.regret();
             break;
           }
+          case EWsAction.reset: {
+            if (ws.current) {
+              ws.current.send(
+                JSON.stringify({
+                  action: EWsAction.reset,
+                })
+              );
+            }
+            break;
+          }
           default: {
             if (isFirstAudio.current) {
               isFirstAudio.current = false;
@@ -89,7 +100,7 @@ function ChessBoard() {
       <audio ref={moveRef} src={moveAudio}></audio>
       <audio ref={eatRef} src={eatAudio}></audio>
       <audio ref={restartRef} src={restartAudio}></audio>
-      <div id="BoardContainer">
+      <div id="BoardContainer" style={{ position: "absolute", left: offset }}>
         <div id="ChessContainer">
           {positions.map(({ no, role, color, status }) => {
             const left = `${(no % 9) * 84 + 65}px`;

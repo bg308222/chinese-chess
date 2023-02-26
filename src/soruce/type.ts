@@ -61,4 +61,5 @@ export enum EWsAction {
   regret = 1,
   restart = 2,
   giftedColor = 3,
+  reset = 4,
 }
